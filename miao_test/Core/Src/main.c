@@ -18,11 +18,12 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "spi.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "ws2812.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -91,6 +92,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_SPI6_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -99,6 +101,26 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    //红->绿
+    for (int i=0; i<=255; i++) {
+      WS2812_Ctrl(255-i,i,0);
+      HAL_Delay(1);
+    }
+    //绿->蓝
+    for (int i=0; i<=255; i++) {
+      WS2812_Ctrl(0,255-i,i);
+      HAL_Delay(1);
+    }
+    //蓝->红
+    for (int i=0; i<=255; i++) {
+      WS2812_Ctrl(i,0,255-i);
+      HAL_Delay(1);
+    }
+    // HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_15);
+    // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
+    // HAL_Delay(100);
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
