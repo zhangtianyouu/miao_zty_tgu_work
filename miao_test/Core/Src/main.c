@@ -19,10 +19,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "spi.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <string.h>
+
 #include "ws2812.h"
 /* USER CODE END Includes */
 
@@ -44,7 +47,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+char receive[] = "a";
+char receive2[] = "b";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -55,7 +59,11 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+  HAL_UART_Transmit_IT(&huart7, (uint8_t *)receive2, strlen(receive2));
 
+  HAL_UART_Receive_IT(&huart7, (uint8_t *)receive, strlen(receive));
+}
 /* USER CODE END 0 */
 
 /**
@@ -93,8 +101,9 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI6_Init();
+  MX_UART7_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_UART_Receive_IT(&huart7, (uint8_t *)receive, strlen(receive));
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,6 +125,7 @@ int main(void)
       WS2812_Ctrl(i,0,255-i);
       HAL_Delay(1);
     }
+
     // HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_15);
     // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
     // HAL_Delay(100);
