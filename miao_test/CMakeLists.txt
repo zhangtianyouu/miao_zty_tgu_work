@@ -34,7 +34,9 @@ enable_language(C ASM)
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME}
         bsp/bsp_led/WS2812/Src/ws2812.c
-        bsp/bsp_led/WS2812/Inc/ws2812.h)
+        bsp/bsp_led/WS2812/Inc/ws2812.h
+        bsp/bsp_uart/Src/command.c
+        bsp/bsp_uart/Inc/command.h)
 
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
@@ -49,12 +51,14 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
         bsp/bsp_led/WS2812/Src/ws2812.c
+        bsp/bsp_uart/Src/command.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
         bsp/bsp_led/WS2812/Inc/
+        bsp/bsp_uart/Inc/
 )
 
 # Add project symbols (macros)

@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
@@ -25,7 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
-
+#include "command.h"
 #include "ws2812.h"
 /* USER CODE END Includes */
 
@@ -47,8 +48,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-char receive[] = "a";
-char receive2[] = "b";
+uint8_t receive[3];
+uint8_t receive2[]="b";
+uint8_t readBuffer[10];
+uint8_t command[50];
+int commandLength = 0;
+volatile int mark=1;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,10 +65,25 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  HAL_UART_Transmit_IT(&huart7, (uint8_t *)receive2, strlen(receive2));
 
-  HAL_UART_Receive_IT(&huart7, (uint8_t *)receive, strlen(receive));
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
+  if (huart == &huart7){
+    Command_Write(readBuffer, Size);
+
+    commandLength = Command_GetCommand(command);
+    if (commandLength != 0) {
+      HAL_UART_Transmit_DMA(&huart7, (uint8_t *)command, commandLength);
+      if (command[0] == '1') {
+        mark = 1;
+      }
+      else if (command[0] == '0') {
+        mark = 0;
+      }
+    }
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart7, readBuffer, sizeof(readBuffer));
+    __HAL_DMA_DISABLE_IT(&hdma_uart7_rx, DMA_IT_HT);
+  }
 }
 /* USER CODE END 0 */
 
@@ -100,30 +121,47 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SPI6_Init();
   MX_UART7_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart7, (uint8_t *)receive, strlen(receive));
+  
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart7, readBuffer, sizeof(readBuffer));
+  __HAL_DMA_DISABLE_IT(&hdma_uart7_rx, DMA_IT_HT);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    //红->绿
-    for (int i=0; i<=255; i++) {
-      WS2812_Ctrl(255-i,i,0);
-      HAL_Delay(1);
+    if (mark == 1) {
+      //红->绿
+      for (int i=0; i<=255; i++) {
+        WS2812_Ctrl(255-i,i,0);
+        HAL_Delay(1);
+      }
+      //绿->蓝
+      for (int i=0; i<=255; i++) {
+        WS2812_Ctrl(0,255-i,i);
+        HAL_Delay(1);
+      }
+      //蓝->红
+      for (int i=0; i<=255; i++) {
+        WS2812_Ctrl(i,0,255-i);
+        HAL_Delay(1);
+      }
     }
-    //绿->蓝
-    for (int i=0; i<=255; i++) {
-      WS2812_Ctrl(0,255-i,i);
-      HAL_Delay(1);
-    }
-    //蓝->红
-    for (int i=0; i<=255; i++) {
-      WS2812_Ctrl(i,0,255-i);
-      HAL_Delay(1);
+    else if (mark == 0) {
+      for (int i=0; i<2; i++) {
+        WS2812_Ctrl(255,0,255);
+        HAL_Delay(100);
+        WS2812_Ctrl(255,255,255);
+        HAL_Delay(200);
+      }
+      while (mark == 0) {
+        // WS2812_Ctrl(255,0,0);
+        WS2812_Ctrl(255,0,255);
+      }
     }
 
     // HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_15);
