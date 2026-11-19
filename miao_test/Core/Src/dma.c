@@ -1,4 +1,4 @@
-/* USER CODE BEGIN HFeader */
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file    dma.c

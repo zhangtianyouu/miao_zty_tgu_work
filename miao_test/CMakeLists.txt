@@ -36,7 +36,10 @@ add_executable(${CMAKE_PROJECT_NAME}
         bsp/bsp_led/WS2812/Src/ws2812.c
         bsp/bsp_led/WS2812/Inc/ws2812.h
         bsp/bsp_uart/Src/command.c
-        bsp/bsp_uart/Inc/command.h)
+        bsp/bsp_uart/Inc/command.h
+        bsp/bsp_can/Src/drv_can.c
+        bsp/bsp_can/Inc/drv_can.h)
+
 
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
@@ -52,6 +55,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
         bsp/bsp_led/WS2812/Src/ws2812.c
         bsp/bsp_uart/Src/command.c
+        bsp/bsp_can/Src/drv_can.c
 )
 
 # Add include paths
@@ -59,6 +63,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
         bsp/bsp_led/WS2812/Inc/
         bsp/bsp_uart/Inc/
+        bsp/bsp_can/Inc/
 )
 
 # Add project symbols (macros)
